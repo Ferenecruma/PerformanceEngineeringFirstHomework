@@ -103,6 +103,40 @@ With the help of `kcachegrind` we can see calls graph and how much time function
 Here we can also notice that `fibonnaci` function was called more than 4 million times and it may indicate that algorithm is not optimal.
 The same thing with the `flash` call inside `write_to_file` function.
 
+
+### perf
+```
+sudo perf record --sample-cpu -d  ./program_for_profiling
+sudo perf report
+```
+
+### Output
+```
+Samples: 40K of event 'cycles', Event count (approx.): 32869831629
+Overhead  Command          Shared Object          Symbol
+  14,07%  program_for_pro  program_for_profiling  [.] fibonacci
+   6,01%  program_for_pro  [kernel.kallsyms]      [k] _raw_spin_lock
+   4,60%  program_for_pro  [kernel.kallsyms]      [k] ext4_do_update_inode.isra.0
+   4,04%  program_for_pro  [kernel.kallsyms]      [k] crc32c_pcl_intel_update
+   3,20%  program_for_pro  [kernel.kallsyms]      [k] memcg_slab_post_alloc_hook
+   2,92%  program_for_pro  [kernel.kallsyms]      [k] send_to_group
+   2,45%  program_for_pro  [kernel.kallsyms]      [k] generic_write_end
+   1,44%  program_for_pro  [kernel.kallsyms]      [k] copy_user_generic_string
+   1,35%  program_for_pro  [kernel.kallsyms]      [k] vfs_write
+   1,24%  program_for_pro  [kernel.kallsyms]      [k] ext4_da_write_end
+   1,21%  program_for_pro  [kernel.kallsyms]      [k] ext4_da_write_begin
+   1,15%  program_for_pro  [kernel.kallsyms]      [k] balance_dirty_pages_ratelimited
+   1,15%  program_for_pro  [kernel.kallsyms]      [k] ext4_generic_write_checks
+   1,13%  program_for_pro  [kernel.kallsyms]      [k] fsnotify
+   1,06%  program_for_pro  [kernel.kallsyms]      [k] __entry_text_start
+   1,06%  program_for_pro  [kernel.kallsyms]      [k] ext4_inode_csum
+   1,05%  program_for_pro  [kernel.kallsyms]      [k] crypto_shash_update
+   0,98%  program_for_pro  [kernel.kallsyms]      [k] get_obj_cgroup_from_current
+   0,98%  program_for_pro  libstdc++.so.6.0.30    [.] std::ostream::flush
+```
+
+It's easy to notice to see very high overhead percent for the `fibonnaci` function call. Also we can that value is quite high for the `std::ostream::flush`.
+
 ### netstat
 
 Network monitoring tool.
@@ -110,29 +144,37 @@ Network monitoring tool.
 #### Command line
 
 ```bash
-netstat -ep -t 20 -c | grep "program_for_profiling"
+netstat -ep -t 20 -c | grep "program_for"
 ```
 
 #### Output
 
 ```bash
-(Not all processes could be identified, non-owned process info
- will not be shown, you would have to be root to see it all.)
-(Not all processes could be identified, non-owned process info
- will not be shown, you would have to be root to see it all.)
-(Not all processes could be identified, non-owned process info
- will not be shown, you would have to be root to see it all.)
-(Not all processes could be identified, non-owned process info
- will not be shown, you would have to be root to see it all.)
-(Not all processes could be identified, non-owned process info
- will not be shown, you would have to be root to see it all.)
-(Not all processes could be identified, non-owned process info
- will not be shown, you would have to be root to see it all.)
-(Not all processes could be identified, non-owned process info
- will not be shown, you would have to be root to see it all.)
+tcp        0      0 roman-MS-7C02:60038     lb-140-82-121-3-f:https ESTABLISHED roman      358036     33485/./program_for 
+tcp        0      0 localhost:53596         localhost:38317         ESTABLISHED roman      350102     33485/./program_for 
+tcp        0      0 roman-MS-7C02:51500     lb-140-82-121-9-f:https ESTABLISHED roman      358042     33485/./program_for 
+tcp        0      0 localhost:38317         localhost:53596         ESTABLISHED roman      350103     33485/./program_for 
+tcp        0      0 roman-MS-7C02:60038     lb-140-82-121-3-f:https ESTABLISHED roman      358036     33485/./program_for 
+tcp        0      0 localhost:53596         localhost:38317         ESTABLISHED roman      350102     33485/./program_for 
+tcp        0      0 roman-MS-7C02:51500     lb-140-82-121-9-f:https ESTABLISHED roman      358042     33485/./program_for 
+tcp        0      0 localhost:38317         localhost:53596         ESTABLISHED roman      350103     33485/./program_for 
+tcp        0      0 roman-MS-7C02:60038     lb-140-82-121-3-f:https ESTABLISHED roman      358036     33485/./program_for 
+tcp        0      0 localhost:53596         localhost:38317         ESTABLISHED roman      350102     33485/./program_for 
+tcp        0      0 roman-MS-7C02:51500     lb-140-82-121-9-f:https ESTABLISHED roman      358042     33485/./program_for 
+tcp        0      0 localhost:38317         localhost:53596         ESTABLISHED roman      350103     33485/./program_for 
+tcp        0      0 roman-MS-7C02:60038     lb-140-82-121-3-f:https ESTABLISHED roman      358036     33485/./program_for 
+tcp        0      0 localhost:53596         localhost:38317         ESTABLISHED roman      350102     33485/./program_for 
+tcp        0      0 roman-MS-7C02:51500     lb-140-82-121-9-f:https ESTABLISHED roman      358042     33485/./program_for 
+tcp        0      0 localhost:38317         localhost:53596         ESTABLISHED roman      350103     33485/./program_for 
+tcp        0      0 roman-MS-7C02:60038     lb-140-82-121-3-f:https ESTABLISHED roman      358036     33485/./program_for 
+tcp        0      0 localhost:53596         localhost:38317         ESTABLISHED roman      350102     33485/./program_for 
+tcp     1424      0 roman-MS-7C02:51500     lb-140-82-121-9-f:https ESTABLISHED roman      358042     33485/./program_for 
+tcp        0      0 localhost:38317         localhost:53596         ESTABLISHED roman      350103     33485/./program_for 
+
 ```
 
-Here we can see the connection from the binary. For some reason it shows that there are no connections associated with the binary.
+Here we can see the connection from the binary. It's easy to see that binary have high network usage. To find out what function actually use the most  
+of traffic we can comment out all the function but one at a time.
 
 ## Conclusion
 
@@ -140,3 +182,4 @@ Here we can see the connection from the binary. For some reason it shows that th
 - `netstat` - shows high network usage in binary but does not give information about specific function
 - `valgrind` - perform very detailed profiling to help find bottlenecks in your programs
 - `kcachegrind` - visualize the results of `valgrind` command as a graph of function calls, helps to detect bottlenecks
+- `perf` - allow kernel performance monitoring and can record CPU performance counters

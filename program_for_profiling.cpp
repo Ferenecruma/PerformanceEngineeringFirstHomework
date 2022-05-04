@@ -7,7 +7,7 @@
 #include <fstream>
 
 // Link to the big text file
-const std::string FILE_URL = "https://github.com/python/cpython/archive/refs/tags/v3.11.0a7.tar.gz";
+const std::string FILE_URL = "https://github.com/nodejs/node/archive/refs/tags/v14.19.2.zip";
 
 int fibonacci(int x)
 {
@@ -45,12 +45,12 @@ void sleep_and_print(int n)
 // sync with file on every write.
 void write_to_file()
 {
-    std::cout << "Writting sting into the file " << std::endl;
+    std::cout << "Writting string into the file " << std::endl;
     auto start = std::chrono::system_clock::now();
 
     std::ofstream file;
     file.open("file.txt");
-    const int CounterTarget = 300000;
+    const int CounterTarget = 4000000;
     for (int counter = 0; counter < CounterTarget; ++counter)
     {
         file << counter << " ";
@@ -69,7 +69,8 @@ void download_text_file(std::string url)
     std::cout << "Downloading text file from the internet" << std::endl;
     auto start = std::chrono::system_clock::now();
 
-    cpr::Response r = cpr::Get(cpr::Url{url});
+    std::ofstream of("node.zip", std::ios::binary);
+    cpr::Response r = cpr::Download(of, cpr::Url{FILE_URL});
     std::cout << "Downloaded bytes: " << r.downloaded_bytes << std::endl;
 
     std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - start;
@@ -78,7 +79,7 @@ void download_text_file(std::string url)
 
 int main()
 {
-    print_fibonacci(30);
+    print_fibonacci(40);
     sleep_and_print(5);
     write_to_file();
     download_text_file(FILE_URL);
